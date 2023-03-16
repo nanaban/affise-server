@@ -18,4 +18,5 @@ docker:
 
 .PHONY: docker-run
 docker-run:
+	@docker rm -f affise-server || exit 0
 	@docker run -p 8080:8080 --name affise-server affise-server:latest
