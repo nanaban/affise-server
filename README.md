@@ -21,3 +21,27 @@
 это должно повлечь за собой остановку всех операций связанных с этим запросом
 - [x] сервис должен поддерживать 'graceful shutdown'
 - [x] результат должен быть выложен на github
+
+### Test:
+```bash
+make test
+```
+
+### Run:
+```bash
+make build
+./bin/server -addr=:8080
+```
+
+### Run in docker:
+```bash
+make docker-build
+make docker-run
+```
+
+### Example:
+```bash
+curl --location --request POST 'http://localhost:8080/requests' \
+--header 'Content-Type: application/json' \
+--data-raw '["https://google.com", "https://ya.ru", "https://facebook.com"]'
+```
