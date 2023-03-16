@@ -127,7 +127,7 @@ func (h *RequestsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(results); err != nil {
+	if err = json.NewEncoder(w).Encode(results); err != nil {
 		err = fmt.Errorf("encode response: %w", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

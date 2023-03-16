@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 
 	"affise-server/internal/config"
 	"affise-server/internal/handlers"
@@ -16,6 +17,8 @@ import (
 
 const (
 	EndPointRequests = "/requests"
+
+	DefaultReadHeaderTimeout = 5 * time.Second
 )
 
 // Server represents server.
@@ -29,7 +32,8 @@ func NewServer(conf *config.Config) *Server {
 	var s = &Server{
 		config: conf,
 		server: &http.Server{
-			Addr: conf.Server.Addr,
+			Addr:              conf.Server.Addr,
+			ReadHeaderTimeout: DefaultReadHeaderTimeout,
 		},
 	}
 

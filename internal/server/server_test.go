@@ -107,6 +107,8 @@ func repeatToSlice(s string, n int) []string {
 }
 
 func TestServer(t *testing.T) {
+	t.Parallel()
+
 	setup(t)
 	t.Cleanup(func() {
 		teardown(t)

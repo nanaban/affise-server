@@ -9,6 +9,7 @@ import (
 	"affise-server/internal/server"
 )
 
+//nolint:gochecknoglobals // it's ok for main
 var (
 	flagServerAddr = flag.String("addr", ":8080", "server address")
 )

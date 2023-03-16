@@ -22,7 +22,7 @@ func NewRateLimit(interval time.Duration, limit int) *RateLimit {
 // Handle handles rate limit middleware.
 func (rl *RateLimit) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if rl.limiter.Allow() == false {
+		if !rl.limiter.Allow() {
 			status := http.StatusTooManyRequests
 			http.Error(w, http.StatusText(status), status)
 			return
