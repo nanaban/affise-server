@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	s := server.NewServer(":8080") //todo
+	s := server.NewServer() //todo
 
 	if err := s.Run(context.Background()); err != nil {
 		log.Fatalf("server run err: %v", err)
