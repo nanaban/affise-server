@@ -13,7 +13,7 @@ lint:
 	@golangci-lint run ./... -v
 
 .PHONY: docker-build
-docker:
+docker-build:
 	@DOCKER_SCAN_SUGGEST=false docker build -t affise-server:latest .
 
 .PHONY: docker-run
