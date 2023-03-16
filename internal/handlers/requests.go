@@ -62,7 +62,7 @@ func (h *RequestsHandler) doGET(ctx context.Context, url string) ([]byte, error)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("status code %d", resp.StatusCode)
 	}
 
