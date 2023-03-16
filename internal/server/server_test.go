@@ -9,9 +9,12 @@ import (
 	"net/http"
 	"sync"
 	"testing"
+
+	"affise-server/internal/config"
 )
 
 type testENV struct {
+	config *config.Config
 	server *Server
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -23,10 +26,14 @@ var env *testENV
 func setup(tb testing.TB) {
 	tb.Helper()
 
+	conf := config.NewDefault()
+	conf.Server.Addr = "localhost:8889"
+
 	ctx, cancel := context.WithCancel(context.Background())
-	s := NewServer(WithAddr("localhost:8889"))
+	s := NewServer(conf)
 
 	env = &testENV{
+		config: conf,
 		server: s,
 		ctx:    ctx,
 		cancel: cancel,

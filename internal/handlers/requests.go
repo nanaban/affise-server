@@ -7,15 +7,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"golang.org/x/sync/errgroup"
-)
 
-const (
-	DefaultMaxURLs       = 20
-	DefaultClientTimeout = 1 * time.Second
-	DefaultClientLimit   = 4
+	"affise-server/internal/config"
 )
 
 var (
@@ -25,14 +20,16 @@ var (
 
 // RequestsHandler represents requests handler.
 type RequestsHandler struct {
+	config *config.Client
 	client *http.Client
 }
 
 // NewRequestsHandler creates new instance of requests handler.
-func NewRequestsHandler() *RequestsHandler {
+func NewRequestsHandler(conf *config.Client) *RequestsHandler {
 	return &RequestsHandler{
+		config: conf,
 		client: &http.Client{
-			Timeout: DefaultClientTimeout,
+			Timeout: conf.RequestTimeout,
 		},
 	}
 }
@@ -40,9 +37,9 @@ func NewRequestsHandler() *RequestsHandler {
 // RequestsRequest represents request for requests handler.
 type RequestsRequest []string
 
-// Validate validates request.
-func (r RequestsRequest) Validate() error {
-	if len(r) == 0 || len(r) > DefaultMaxURLs {
+// validateRequest validates request.
+func (h *RequestsHandler) validateRequest(r RequestsRequest) error {
+	if len(r) == 0 || len(r) > h.config.RequestMaxURLs {
 		return ErrInvalidCountURLs
 	}
 
@@ -77,7 +74,7 @@ func (h *RequestsHandler) doGET(ctx context.Context, url string) ([]byte, error)
 // doRequests makes GET requests to the urls and returns responses.
 func (h *RequestsHandler) doRequests(ctx context.Context, req RequestsRequest) ([][]byte, error) {
 	g, ctx := errgroup.WithContext(ctx)
-	g.SetLimit(DefaultClientLimit)
+	g.SetLimit(h.config.RequestMaxConcurrent)
 
 	results := make([][]byte, len(req))
 	for i, url := range req {
@@ -116,7 +113,7 @@ func (h *RequestsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := req.Validate(); err != nil {
+	if err := h.validateRequest(req); err != nil {
 		err = fmt.Errorf("validate request: %w", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

@@ -8,67 +8,42 @@ import (
 	"os"
 	"os/signal"
 	"sync"
-	"time"
 
+	"affise-server/internal/config"
 	"affise-server/internal/handlers"
 	"affise-server/internal/middleware"
 )
 
 const (
 	EndPointRequests = "/requests"
-
-	DefaultAddr         = ":8080"
-	DefaultRateInterval = 1 * time.Second
-	DefaultRateLimit    = 100
 )
 
-// Option is a function that configures the server.
-type Option func(*Server)
-
-// WithServer is an option to set the http.Server.
-func WithServer(s *http.Server) Option {
-	return func(srv *Server) {
-		srv.server = s
-	}
-}
-
-// WithAddr is an option to set the server address.
-func WithAddr(addr string) Option {
-	return func(srv *Server) {
-		srv.addr = addr
-	}
-}
-
+// Server represents server.
 type Server struct {
-	addr   string
+	config *config.Config
 	server *http.Server
 }
 
-func NewServer(opts ...Option) *Server {
-	var s = &Server{}
-	for _, opt := range opts {
-		opt(s)
+// NewServer creates new instance of server.
+func NewServer(conf *config.Config) *Server {
+	var s = &Server{
+		config: conf,
+		server: &http.Server{
+			Addr: conf.Server.Addr,
+		},
 	}
 
-	if s.addr == "" {
-		s.addr = DefaultAddr
-	}
-
-	if s.server == nil {
-		s.server = &http.Server{
-			Addr: s.addr,
-		}
-	}
-
-	limiter := middleware.NewRateLimit(DefaultRateInterval, DefaultRateLimit)
+	rateMV := middleware.NewRateLimit(conf.Server.RateInterval, conf.Server.RateLimit)
+	requests := handlers.NewRequestsHandler(&conf.Client)
 
 	mux := http.NewServeMux()
-	mux.Handle(EndPointRequests, limiter.Handle(handlers.NewRequestsHandler()))
+	mux.Handle(EndPointRequests, rateMV.Handle(requests))
 	s.server.Handler = mux
 
 	return s
 }
 
+// Run runs server.
 func (s *Server) Run(ctx context.Context) error {
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
 	defer stop()
